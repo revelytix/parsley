@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.cgrand</groupId>
   <artifactId>parsley</artifactId>
-  <version>0.9.1</version>
+  <version>0.9.1-rev</version>
   <name>parsley</name>
   <description>a generator of total and truly incremental parsers</description>
   <url>http://github.com/cgrand/parsley/</url>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>[1.2.0,)</version>
+      <version>1.4.0</version>
     </dependency>
     <dependency>
       <groupId>net.cgrand</groupId>
