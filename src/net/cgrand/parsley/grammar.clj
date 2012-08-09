@@ -9,8 +9,6 @@
 (ns net.cgrand.parsley.grammar
   (:require [net.cgrand.parsley.util :as u]))
 
-(alias 'p 'net.cgrand.parsley) ; avoid circular dependency
-
 ;; A grammar production right-hand side consists of a combination of:
 ;; * vectors (sequence)
 ;; * sets (alternatives)
@@ -177,12 +175,12 @@
         rules (partition 2 rules)
         public-rulenames (remove private? (map first rules))
         {:keys [main space root-tag] 
-         :or {main (first public-rulenames) root-tag ::p/root space #{[]}}} 
+         :or {main (first public-rulenames) root-tag :net.cgrand.parsley/root space #{[]}}} 
           options-map
         public-rulenames (-> (zipmap public-rulenames (map unalias public-rulenames)) 
-                           (assoc ::p/S root-tag))
+                           (assoc :net.cgrand.parsley/S root-tag))
         rules (concat rules 
-                [[::p/S (Root. main)] [::space (unspaced space)]])
+                [[:net.cgrand.parsley/S (Root. main)] [::space (unspaced space)]])
         grammar (into {} (for [[name specs] rules]
                            [(basename name) (unsugar specs)]))
         [rewrites grammar] (collect-new-rules grammar)
@@ -190,7 +188,7 @@
         grammar (dissoc grammar ::space)
         grammar (-> grammar 
                   (normalize space rewrites)
-                  (assoc ::canary #{[::p/S ::eof]})
+                  (assoc ::canary #{[:net.cgrand.parsley/S ::eof]})
                   inline-empty-prods)
         matches-empty (contains? (grammar ::canary) [::eof])
         grammar (dissoc grammar ::canary)]

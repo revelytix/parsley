@@ -13,8 +13,6 @@
             [net.cgrand.parsley.stack :as st]
             [net.cgrand.regex :as re]))
 
-(alias 'p 'net.cgrand.parsley) ; avoid circular dependency
-
 ; I independently figured out a technique similar to the one described
 ; in this paper: Context-Aware Scanning for Parsing Extensible Languages
 ; http://www.umsec.umn.edu/publications/Context-Aware-Scanning-Parsing-Extensible-Language
@@ -224,9 +222,9 @@
   (concat (vals gotos) (vals shifts)))
 
 (defn lr-table [[grammar tags matches-empty]]
-  (let [grammar (-> grammar (dissoc ::p/S) 
-                  (assoc 0 (::p/S grammar)))
-        tags (assoc tags 0 (tags ::p/S))
+  (let [grammar (-> grammar (dissoc :net.cgrand.parsley/S) 
+                  (assoc 0 (:net.cgrand.parsley/S grammar)))
+        tags (assoc tags 0 (tags :net.cgrand.parsley/S))
         init-states (u/map-vals grammar #(set (for [prod %2] [%1 (count prod) prod])))
         close (partial close init-states)
         state0 (-> 0 init-states close)
@@ -252,11 +250,11 @@
           nil state))
 
 (defn- unfinished-state [public accept n]
-  (let [state #{[::p/unfinished (inc n) nil]}
-        state-id [::p/unfinished (boolean public) (boolean accept) n]
-        transitions (transitions identity (if public #{::p/unfinished} #{}) state)
+  (let [state #{[:net.cgrand.parsley/unfinished (inc n) nil]}
+        state-id [:net.cgrand.parsley/unfinished (boolean public) (boolean accept) n]
+        transitions (transitions identity (if public #{:net.cgrand.parsley/unfinished} #{}) state)
         transitions (if accept 
-                      (assoc transitions :accept [::p/unfinished -1 ::p/unfinished])
+                      (assoc transitions :accept [:net.cgrand.parsley/unfinished -1 :net.cgrand.parsley/unfinished])
                       transitions)]
     [state-id transitions]))
 
@@ -274,18 +272,18 @@
             table
           (= 0 state)
             (let [table (if-not (:accept transition)
-                          (assoc-in table [state :accept] [::p/unfinished -1 ::p/unfinished])
+                          (assoc-in table [state :accept] [:net.cgrand.parsley/unfinished -1 :net.cgrand.parsley/unfinished])
                           table)
                   [ustate utransition :as ust] (unfinished-state (tags 0) true 0)
-                  table (assoc-in table [state :gotos ::p/unfinished] ustate)]
+                  table (assoc-in table [state :gotos :net.cgrand.parsley/unfinished] ustate)]
               (conj table ust))
           :let [[k n] (eof-reduction state)
-                tag (when (tags k) ::p/unfinished)
+                tag (when (tags k) :net.cgrand.parsley/unfinished)
                 [ustate utransition :as ust] (unfinished-state tag (= 0 k) n)]
           (conj table ust
                 [state (-> transition
-                         (assoc :eof [::p/unfinished n tag])
-                         (assoc-in [:gotos ::p/unfinished] ustate))])))
+                         (assoc :eof [:net.cgrand.parsley/unfinished n tag])
+                         (assoc-in [:gotos :net.cgrand.parsley/unfinished] ustate))])))
     table table)))
 
 (defn number-states [table]
